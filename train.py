@@ -98,11 +98,14 @@ def evaluate(config, model, data_iter, test=False):
 
     acc = metrics.accuracy_score(labels_all, predict_all)
     if test:
+        all_labels = list(range(config.num_classes))
         report = metrics.classification_report(labels_all,
                                                predict_all,
-                            target_names=config.class_list,
-                                               digits=4)
-        confusion = metrics.confusion_matrix(labels_all, predict_all)
+                                               labels=all_labels,
+                                               target_names=config.class_list,
+                                               digits=4,
+                                               zero_division=0)
+        confusion = metrics.confusion_matrix(labels_all, predict_all,
+                                             labels=all_labels)
         return acc, loss_total / len(data_iter), report, confusion
     return acc, loss_total / len(data_iter)
-
