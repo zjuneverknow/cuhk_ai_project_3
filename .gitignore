@@ -1,0 +1,9 @@
+guidance/
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+outputs/
+outputs_*/
+THUCNews/saved_dict/
+THUCNews/log/

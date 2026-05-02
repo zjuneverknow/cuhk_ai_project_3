@@ -1,0 +1,71 @@
+name: Project 3 Experiments
+
+on:
+  workflow_dispatch:
+    inputs:
+      experiment:
+        description: "Which experiment to run"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - flatten
+          - cls
+      epochs:
+        description: "Number of training epochs"
+        required: true
+        default: "6"
+
+jobs:
+  run-experiments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run selected experiment
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf outputs outputs_cls
+
+          case "${{ inputs.experiment }}" in
+            flatten)
+              uv run python project_tasks.py \
+                --classifier-head flatten \
+                --epochs "${{ inputs.epochs }}"
+              ;;
+            cls)
+              uv run python project_tasks.py \
+                --classifier-head cls \
+                --epochs "${{ inputs.epochs }}"
+              ;;
+            all)
+              uv run python project_tasks.py \
+                --classifier-head flatten \
+                --epochs "${{ inputs.epochs }}"
+              uv run python project_tasks.py \
+                --classifier-head cls \
+                --epochs "${{ inputs.epochs }}"
+              ;;
+          esac
+
+      - name: Upload experiment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: project3-experiment-outputs
+          path: |
+            outputs/
+            outputs_cls/
+          if-no-files-found: error
