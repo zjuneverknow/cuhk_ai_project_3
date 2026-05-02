@@ -204,10 +204,11 @@ def main():
     parser.add_argument('--batch-size', type=int, default=None)
     parser.add_argument(
         '--classifier-head',
-        choices=['flatten', 'cls'],
+        choices=['flatten', 'cls', 'mean'],
         default='flatten',
         help='flatten keeps the original head; cls enables the optional '
-             'Dropout + Linear first-token pooling head.',
+             'Dropout + Linear first-token pooling head; mean enables '
+             'mean pooling over all token embeddings.',
     )
     parser.add_argument('--output-dir', type=Path, default=Path('outputs'))
     args = parser.parse_args()

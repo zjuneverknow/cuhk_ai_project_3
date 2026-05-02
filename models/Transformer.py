@@ -40,7 +40,7 @@ class Config(object):
         self.num_head = 5
         self.num_encoder = 2
 
-        # flatten: original head; cls: optional bonus architecture.
+        # flatten: original head; cls/mean: optional bonus architectures.
         self.classifier_head = 'flatten'
 
 
@@ -70,7 +70,7 @@ class Model(nn.Module):
         ])
 
         self.classifier_head = getattr(config, 'classifier_head', 'flatten')
-        if self.classifier_head == 'cls':
+        if self.classifier_head in ('cls', 'mean'):
             self.dropout = nn.Dropout(config.dropout)
             self.fc1 = nn.Linear(config.dim_model, config.num_classes)
         elif self.classifier_head == 'flatten':
@@ -80,7 +80,8 @@ class Model(nn.Module):
             )
         else:
             raise ValueError(
-                "classifier_head must be 'flatten' or 'cls', got {}".format(
+                "classifier_head must be 'flatten', 'cls', or 'mean', "
+                "got {}".format(
                     self.classifier_head
                 )
             )
@@ -93,6 +94,8 @@ class Model(nn.Module):
 
         if self.classifier_head == 'cls':
             out = self.dropout(out[:, 0, :])
+        elif self.classifier_head == 'mean':
+            out = self.dropout(out.mean(dim=1))
         else:
             out = out.view(out.size(0), -1)
         out = self.fc1(out)

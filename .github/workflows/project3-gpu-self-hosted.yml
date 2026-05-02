@@ -12,6 +12,7 @@ on:
           - all
           - flatten
           - cls
+          - mean
       epochs:
         description: "Number of training epochs"
         required: true
@@ -55,7 +56,7 @@ jobs:
       - name: Run selected experiment
         shell: powershell
         run: |
-          Remove-Item -Recurse -Force outputs, outputs_cls -ErrorAction SilentlyContinue
+          Remove-Item -Recurse -Force outputs, outputs_cls, outputs_mean -ErrorAction SilentlyContinue
 
           if ("${{ inputs.experiment }}" -eq "flatten") {
             uv run python project_tasks.py --classifier-head flatten --epochs "${{ inputs.epochs }}"
@@ -63,9 +64,13 @@ jobs:
           elseif ("${{ inputs.experiment }}" -eq "cls") {
             uv run python project_tasks.py --classifier-head cls --epochs "${{ inputs.epochs }}"
           }
+          elseif ("${{ inputs.experiment }}" -eq "mean") {
+            uv run python project_tasks.py --classifier-head mean --epochs "${{ inputs.epochs }}"
+          }
           else {
             uv run python project_tasks.py --classifier-head flatten --epochs "${{ inputs.epochs }}"
             uv run python project_tasks.py --classifier-head cls --epochs "${{ inputs.epochs }}"
+            uv run python project_tasks.py --classifier-head mean --epochs "${{ inputs.epochs }}"
           }
 
       - name: Upload experiment outputs
@@ -75,4 +80,5 @@ jobs:
           path: |
             outputs/
             outputs_cls/
+            outputs_mean/
           if-no-files-found: error
